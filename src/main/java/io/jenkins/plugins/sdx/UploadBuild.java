@@ -18,8 +18,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -29,14 +28,13 @@ public class UploadBuild extends Recorder {
 
 
     public final String upload;
-    public final String submit;
+
     public final String params;
 
 
     @DataBoundConstructor
-    public UploadBuild(String upload, String submit, String params) {
+    public UploadBuild(String upload, String params) {
         this.upload = upload;
-        this.submit = submit;
         this.params = params;
     }
 
@@ -55,20 +53,24 @@ public class UploadBuild extends Recorder {
         if (build.getResult().isWorseOrEqualTo(Result.FAILURE)) {
             return false;
         }
-        if (params == null || !params.contains("$")) {
-            listener.getLogger().println("不能不获取参数啊");
-            return false;
-        }
         EnvVars environment = build.getEnvironment(listener);
 
-
+        if (params == null) {
+            listener.getLogger().println("是不是忘了设置获取的参数啊");
+            return false;
+        }
         List<String> fileName = findFile(build.getWorkspace());
         //构建类型..当然可以修改为自己的参数
-
-        String serviceType = environment.get("SERVICE_TYPE", "0");
-
+        String[] list = params.split("$");
+        Map<String, String> mapParams = new HashMap<>();
+        for (String param : list) {
+            if (param != null && param.length() > 0) {
+                String value = environment.get(param, "");
+                mapParams.put(param.toLowerCase(), value);
+            }
+        }
         for (String path : fileName) {
-            UploadInfo info = UploadClient.postFile(upload, new File(path));
+            UploadInfo info = UploadClient.postFile(upload, new File(path),mapParams);
             listener.getLogger().println(info);
         }
 

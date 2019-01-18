@@ -5,22 +5,26 @@ import okhttp3.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by dx on 19-1-18.
  */
 public class UploadClient {
-    static UploadInfo postFile(String url, File file) throws IOException {
-        MediaType mediaType = MediaType.parse("text/*; charset=utf-8");
+    static UploadInfo postFile(String url, File file, Map<String, String> mapParams) throws IOException {
         OkHttpClient okHttpClient = new OkHttpClient();
-
-        RequestBody requestBody = new MultipartBody.Builder()
+        MultipartBody.Builder builder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("file", file.getName(),
-                        RequestBody.create(MediaType.parse("multipart/form-data"), file))
-                .addFormDataPart("serviceType", "23")
-                .build();
+                        RequestBody.create(MediaType.parse("multipart/form-data"), file));
 
+        Set<Map.Entry<String, String>> entries = mapParams.entrySet();
+        for (Map.Entry<String, String> entry : entries) {
+            builder.addFormDataPart(entry.getKey(), entry.getValue());
+        }
+
+        RequestBody requestBody = builder.build();
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
