@@ -72,11 +72,10 @@ public class UploadBuild extends Recorder {
         listener.getLogger().println("upload params:");
         for (String param : list) {
             if (param != null && param.length() > 0) {
-                String realParam = param.replace("$", "").trim();
-                String value = environment.get(realParam, "");
-                listener.getLogger().println(realParam.toLowerCase() + ":" + value);
+                String value = environment.get(param, "");
+                listener.getLogger().println(param.toLowerCase() + ":" + value);
 
-                mapParams.put(realParam.toLowerCase(), value);
+                mapParams.put(param.toLowerCase(), value);
             }
         }
         List<ResultItem> items = new ArrayList<>();
