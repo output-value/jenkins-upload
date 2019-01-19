@@ -3,7 +3,10 @@
     <f:entry title="UploadPath" field="upload">
         <f:textbox />
     </f:entry>
-        <f:entry title="Params" field="params">
-            <f:textbox />
-        </f:entry>
+    <f:entry title="Params" field="params">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="FilePath" field="path">
+        <f:textbox />
+    </f:entry>
 </j:jelly>

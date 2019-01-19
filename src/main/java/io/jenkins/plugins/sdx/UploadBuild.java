@@ -32,16 +32,19 @@ import java.util.Map;
  */
 public class UploadBuild extends Recorder {
 
-
+    //上传url
     public final String upload;
-
+    //参数
     public final String params;
+    //路径
+    public final String path;
 
 
     @DataBoundConstructor
-    public UploadBuild(String upload, String params) {
+    public UploadBuild(String upload, String params, String path) {
         this.upload = upload;
         this.params = params;
+        this.path = path;
     }
 
     //和前台配置相关
@@ -65,7 +68,9 @@ public class UploadBuild extends Recorder {
             listener.getLogger().println("是不是忘了设置获取的参数啊");
             return false;
         }
-        List<String> fileName = findFile(build.getWorkspace());
+        FilePath rootFilePath = new FilePath(build.getWorkspace(), path);
+        listener.getLogger().println(rootFilePath.getRemote());
+        List<String> fileName = findFile(rootFilePath);
         //构建类型..当然可以修改为自己的参数
         String[] list = params.split("\\$");
         Map<String, String> mapParams = new HashMap<>();
