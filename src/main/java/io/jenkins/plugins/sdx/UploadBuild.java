@@ -67,7 +67,7 @@ public class UploadBuild extends Recorder {
         }
         List<String> fileName = findFile(build.getWorkspace());
         //构建类型..当然可以修改为自己的参数
-        String[] list = params.split("$");
+        String[] list = params.split("\\$");
         Map<String, String> mapParams = new HashMap<>();
         listener.getLogger().println("upload params:");
         for (String param : list) {
