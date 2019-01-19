@@ -1,4 +1,4 @@
-# jenkins-plus
+# jenkins-plugins
 jenkins打包之后上传apk文件
 
 ## 设置参数
