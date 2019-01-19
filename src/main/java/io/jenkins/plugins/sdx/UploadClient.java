@@ -1,5 +1,6 @@
 package io.jenkins.plugins.sdx;
 
+import io.jenkins.plugins.sdx.domain.UploadInfo;
 import net.sf.json.JSONObject;
 import okhttp3.*;
 
@@ -11,7 +12,7 @@ import java.util.Set;
 /**
  * Created by dx on 19-1-18.
  */
-public class UploadClient {
+class UploadClient {
     static UploadInfo postFile(String url, File file, Map<String, String> mapParams) throws IOException {
         OkHttpClient okHttpClient = new OkHttpClient();
         MultipartBody.Builder builder = new MultipartBody.Builder()
@@ -39,8 +40,10 @@ public class UploadClient {
             String code = jsonObject.getString("code");
             if ("1".equals(code)) {
                 String downloadUrl = jsonObject.getString("url");
+                String channel = jsonObject.getString("channel");
                 info.setResult(true);
                 info.setUrl(downloadUrl);
+                info.setChannel(channel);
             } else {
                 info.setResult(false);
             }

@@ -1,4 +1,4 @@
-package io.jenkins.plugins.sdx;
+package io.jenkins.plugins.sdx.domain;
 
 
 /**
@@ -8,6 +8,7 @@ public class UploadInfo {
     private String url;
     private boolean result;
     private String filePath;
+    private String channel;
 
     public String getFilePath() {
         return filePath;
@@ -33,12 +34,21 @@ public class UploadInfo {
         this.result = result;
     }
 
+    public String getChannel() {
+        return channel;
+    }
+
+    public void setChannel(String channel) {
+        this.channel = channel;
+    }
+
     @Override
     public String toString() {
         return "UploadInfo{" +
                 "url='" + url + '\'' +
                 ", result=" + result +
                 ", filePath='" + filePath + '\'' +
+                ", channel='" + channel + '\'' +
                 '}';
     }
 }
