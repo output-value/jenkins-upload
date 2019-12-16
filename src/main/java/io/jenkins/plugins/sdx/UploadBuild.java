@@ -65,11 +65,13 @@ public class UploadBuild extends Recorder {
         EnvVars environment = build.getEnvironment(listener);
 
         if (params == null) {
-            listener.getLogger().println("是不是忘了设置获取的参数啊");
+            listener.error("错误").println("是不是忘了设置获取的参数啊");
             return false;
         }
         FilePath rootFilePath = new FilePath(build.getWorkspace(), path);
+        listener.getLogger().println("开始记录");
         listener.getLogger().println(rootFilePath.getRemote());
+        listener.getLogger().println("结束记录");
         List<String> fileName = findFile(rootFilePath);
         //构建类型..当然可以修改为自己的参数
         String[] list = params.split("\\$");
