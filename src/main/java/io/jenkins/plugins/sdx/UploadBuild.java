@@ -88,12 +88,14 @@ public class UploadBuild extends Recorder {
         List<ResultItem> items = new ArrayList<>();
         listener.getLogger().println("upload start");
         for (String path : fileName) {
+            long startTime = System.currentTimeMillis();
             UploadInfo info = UploadClient.postFile(upload, new File(path), mapParams);
             ResultItem resultItem = new ResultItem();
             resultItem.setUrl(info.getUrl());
             resultItem.setChannel(info.getChannel());
             items.add(resultItem);
             listener.getLogger().println(info);
+            listener.getLogger().println("上传消耗时间" + (System.currentTimeMillis() - startTime) / 1000 + "秒");
         }
         listener.getLogger().println("upload end,the result is:");
         String result = JSONArray.fromObject(items).toString();
