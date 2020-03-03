@@ -54,6 +54,15 @@ class UploadClient {
                 info.setResult(false);
             }
         } else {
+
+            ResponseBody body = response.body();
+            String extra="";
+            if (body==null){
+                extra="返回的是null";
+            }else {
+                extra=body.string();
+            }
+            info.setErrorMsg(response.code()+"__"+extra);
             info.setResult(false);
         }
 

@@ -19,12 +19,16 @@ import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 
 /**
@@ -58,7 +62,7 @@ public class UploadBuild extends Recorder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, final BuildListener listener) throws IOException, InterruptedException {
         if (build.getResult().isWorseOrEqualTo(Result.FAILURE)) {
             return false;
         }
@@ -75,7 +79,7 @@ public class UploadBuild extends Recorder {
         List<String> fileName = findFile(rootFilePath);
         //构建类型..当然可以修改为自己的参数
         String[] list = params.split("\\$");
-        Map<String, String> mapParams = new HashMap<>();
+        final Map<String, String> mapParams = new HashMap<>();
         listener.getLogger().println("upload params:");
         for (String param : list) {
             if (param != null && param.length() > 0) {
@@ -85,18 +89,49 @@ public class UploadBuild extends Recorder {
                 mapParams.put(param.toLowerCase(), value);
             }
         }
-        List<ResultItem> items = new ArrayList<>();
-        listener.getLogger().println("upload start");
-        for (String path : fileName) {
-            long startTime = System.currentTimeMillis();
-            UploadInfo info = UploadClient.postFile(upload, new File(path), mapParams);
-            ResultItem resultItem = new ResultItem();
-            resultItem.setUrl(info.getUrl());
-            resultItem.setChannel(info.getChannel());
-            items.add(resultItem);
-            listener.getLogger().println(info);
-            listener.getLogger().println("上传消耗时间" + (System.currentTimeMillis() - startTime) / 1000 + "秒");
+        final List<ResultItem> items = new ArrayList<>();
+        SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long start = System.currentTimeMillis();
+        listener.getLogger().println("upload start"+format.format(start));
+        List<Future<?>> submitList=new ArrayList<>();
+        for (final String path : fileName) {
+            Future<?> submit = ThreadPool.getInstance().submit(new Runnable() {
+                @Override
+                public void run() {
+                    long startTime = System.currentTimeMillis();
+                    UploadInfo info = null;
+                    try {
+                        info = UploadClient.postFile(upload, new File(path), mapParams);
+                    } catch (IOException e) {
+                        info = new UploadInfo();
+                        info.setResult(false);
+                        info.setErrorMsg(e.getMessage() + "错误");
+                    }
+                    if (!info.isResult()) {
+                        listener.getLogger().println("-------上传失败-------");
+                        listener.getLogger().println(info.getErrorMsg());
+                        listener.getLogger().println("--------------");
+                    }
+                    ResultItem resultItem = new ResultItem();
+                    resultItem.setUrl(info.getUrl());
+                    resultItem.setChannel(info.getChannel());
+                    items.add(resultItem);
+                    listener.getLogger().println(info);
+                    listener.getLogger().println("上传消耗时间" + (System.currentTimeMillis() - startTime) / 1000 + "秒");
+                }
+            });
+            submitList.add(submit);
         }
+        for (Future<?> future : submitList) {
+            try {
+                Object o = future.get();
+            } catch (ExecutionException e) {
+
+            }
+        }
+        long end= System.currentTimeMillis();
+        listener.getLogger().println("upload end"+format.format(end));
+        listener.getLogger().println("耗时："+(end-start)/1000+"秒");
         listener.getLogger().println("upload end,the result is:");
         String result = JSONArray.fromObject(items).toString();
         listener.getLogger().println(result);

@@ -9,6 +9,15 @@ public class UploadInfo {
     private boolean result;
     private String filePath;
     private String channel;
+    private String errorMsg;
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
 
     public String getFilePath() {
         return filePath;
