@@ -93,41 +93,28 @@ public class UploadBuild extends Recorder {
         SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long start = System.currentTimeMillis();
         listener.getLogger().println("upload start"+format.format(start));
-        List<Future<?>> submitList=new ArrayList<>();
         for (final String path : fileName) {
-            Future<?> submit = ThreadPool.getInstance().submit(new Runnable() {
-                @Override
-                public void run() {
-                    long startTime = System.currentTimeMillis();
-                    UploadInfo info = null;
-                    try {
-                        info = UploadClient.postFile(upload, new File(path), mapParams);
-                    } catch (IOException e) {
-                        info = new UploadInfo();
-                        info.setResult(false);
-                        info.setErrorMsg(e.getMessage() + "错误");
-                    }
-                    if (!info.isResult()) {
-                        listener.getLogger().println("-------上传失败-------");
-                        listener.getLogger().println(info.getErrorMsg());
-                        listener.getLogger().println("--------------");
-                    }
-                    ResultItem resultItem = new ResultItem();
-                    resultItem.setUrl(info.getUrl());
-                    resultItem.setChannel(info.getChannel());
-                    items.add(resultItem);
-                    listener.getLogger().println(info);
-                    listener.getLogger().println("上传消耗时间" + (System.currentTimeMillis() - startTime) / 1000 + "秒");
-                }
-            });
-            submitList.add(submit);
-        }
-        for (Future<?> future : submitList) {
+            listener.getLogger().println("upload:"+path);
+            long startTime = System.currentTimeMillis();
+            UploadInfo info = null;
             try {
-                Object o = future.get();
-            } catch (ExecutionException e) {
-
+                info = UploadClient.postFile(upload, new File(path), mapParams);
+            } catch (IOException e) {
+                info = new UploadInfo();
+                info.setResult(false);
+                info.setErrorMsg(e.getMessage() + "错误");
             }
+            if (!info.isResult()) {
+                listener.getLogger().println("-------上传失败-------");
+                listener.getLogger().println(info.getErrorMsg());
+                listener.getLogger().println("--------------");
+            }
+            ResultItem resultItem = new ResultItem();
+            resultItem.setUrl(info.getUrl());
+            resultItem.setChannel(info.getChannel());
+            items.add(resultItem);
+            listener.getLogger().println(info);
+            listener.getLogger().println("上传消耗时间" + (System.currentTimeMillis() - startTime) / 1000 + "秒");
         }
         long end= System.currentTimeMillis();
         listener.getLogger().println("upload end"+format.format(end));
